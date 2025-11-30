@@ -1,58 +1,272 @@
-﻿<Window x:Class="ExchangeSoft.MainWindow"
+<Window x:Class="ExchangeSoft.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ExchangeSoft"
         mc:Ignorable="d"
-        Title="Exchange Software" Height="450" Width="800" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+        Title="Exchange Software" Height="520" Width="880"
+        Background="#0B0816"
+        WindowStartupLocation="CenterScreen">
     <Window.DataContext>
-        <local:ViewModel/>
+        <local:ViewModel />
     </Window.DataContext>
-    <DockPanel Background ="#dce0e6">
-        <Menu DockPanel.Dock="Top" Background="#dce0e6">
-            <MenuItem Header="Файл">
-                <MenuItem Header="Закрити" Command="{Binding Path=Exit}"/>
-            </MenuItem>
-            <MenuItem Header="Допомога" Command="{Binding Path=Help}"/>
-            <MenuItem Header="Про розробника" Command="{Binding Path=About}"/>
-        </Menu>
-        <Border Margin="40" BorderBrush="Black" CornerRadius="25" Background="#d0dff5">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="50"/>
-            </Border.Effect>
-            <DockPanel>
-            <UniformGrid Columns="2" DockPanel.Dock="Top" Margin="10">
-                <ListBox SelectedValue="{Binding Model.Base}">
-                    <ListBoxItem Content="UAH"/>
-                    <ListBoxItem Content="RUB"/>
-                    <ListBoxItem Content="USD"/>
-                    <ListBoxItem Content="EUR"/>
-                    <ListBoxItem Content="BYN"/>
-                    <ListBoxItem Content="JPY"/>
-                    <ListBoxItem Content="CNY"/>
-                </ListBox>
-                <ListBox SelectedValue="{Binding Model.Converted}">
-                    <ListBoxItem Content="UAH"/>
-                    <ListBoxItem Content="RUB"/>
-                    <ListBoxItem Content="USD"/>
-                    <ListBoxItem Content="EUR"/>
-                    <ListBoxItem Content="BYN"/>
-                    <ListBoxItem Content="JPY"/>
-                    <ListBoxItem Content="CNY"/>
-                </ListBox>
-            </UniformGrid>
-            <StackPanel>
-                <UniformGrid Columns="2">
-                    <Label Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Left" Content="{Binding Model.Base}"/>
-                    <Label Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Right" Content="{Binding Model.Converted}"/>
-                </UniformGrid>
-                <TextBox VerticalAlignment="Center" BorderThickness="10px" BorderBrush="AliceBlue" HorizontalAlignment="Center" FontSize="26pt"
-                 Text="{Binding Model.BaseAmount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <Label VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="26pt" Content="{Binding Model.ResultAmount}"/>
-                <Label HorizontalAlignment="Right" VerticalAlignment="Bottom" Content="{Binding Model.ErrorOccured}"/>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <DockPanel Margin="24" Grid.Row="0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                <TextBlock Text="Mode" Foreground="#B026FF" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <ToggleButton x:Name="ModeToggle"
+                              Width="140"
+                              Height="44"
+                              Margin="12,0,0,0"
+                              Cursor="Hand"
+                              IsChecked="False"
+                              Click="ModeToggle_OnClick"
+                              Background="#131022"
+                              BorderThickness="0"
+                              Foreground="White"
+                              FontWeight="Bold">
+                    <ToggleButton.Template>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Grid>
+                                <Border x:Name="ToggleBorder"
+                                        CornerRadius="22"
+                                        Background="#17132A"
+                                        BorderBrush="#3B2A57"
+                                        BorderThickness="1">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <Border x:Name="FiatPill"
+                                                Margin="4"
+                                                CornerRadius="18"
+                                                Background="#B026FF"
+                                                Grid.Column="0">
+                                            <TextBlock Text="Fiat" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" />
+                                        </Border>
+                                        <Border x:Name="CryptoPill"
+                                                Margin="4"
+                                                CornerRadius="18"
+                                                Background="Transparent"
+                                                Grid.Column="1">
+                                            <TextBlock Text="Crypto" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" />
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="FiatPill" Property="Background" Value="Transparent" />
+                                    <Setter TargetName="CryptoPill" Property="Background" Value="#B026FF" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </ToggleButton.Template>
+                </ToggleButton>
             </StackPanel>
+            <TextBlock Text="Fiat / Crypto switch"
+                       Foreground="#C5C7D3"
+                       FontSize="14"
+                       Opacity="0.75"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       DockPanel.Dock="Right" />
         </DockPanel>
-    </Border>
-    </DockPanel>
+
+        <Border Grid.Row="1"
+                Margin="24"
+                Padding="24"
+                CornerRadius="18"
+                Background="#120F1F"
+                BorderBrush="#2A1F3D"
+                BorderThickness="1">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="20" Color="#8A2BE2" ShadowDepth="0" Opacity="0.3" />
+            </Border.Effect>
+            <Grid>
+                <Grid.Resources>
+                    <DataTemplate x:Key="FiatTemplate">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="Fiat Accounts" FontSize="24" FontWeight="Bold" Foreground="White" />
+                                <TextBlock Text="Баланс фиатных кошельков и быстрый обмен в локальной валюте." Foreground="#C5C7D3" TextWrapping="Wrap" />
+                                <Border Background="#1A1628" CornerRadius="12" Padding="16" BorderBrush="#2C2341" BorderThickness="1">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="USD • 4 280" Foreground="White" FontSize="18" FontWeight="SemiBold" />
+                                        <TextBlock Text="Последняя операция: банковский перевод" Foreground="#9BA0B5" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="#1A1628" CornerRadius="12" Padding="16" BorderBrush="#2C2341" BorderThickness="1">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="EUR • 1 120" Foreground="White" FontSize="18" FontWeight="SemiBold" />
+                                        <TextBlock Text="Последняя операция: карта VISA" Foreground="#9BA0B5" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                            <Border Grid.Column="1" Background="#160F2A" CornerRadius="16" Padding="20" BorderBrush="#2C2341" BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Text="Курсы" Foreground="#C5C7D3" />
+                                    <TextBlock Text="1 USD = 36.7 UAH" Foreground="White" FontSize="20" FontWeight="Bold" />
+                                    <TextBlock Text="1 EUR = 39.9 UAH" Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,6,0,0" />
+                                    <TextBlock Text="Обновление в реальном времени" Foreground="#7C7FA3" Margin="0,12,0,0" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+
+                    <DataTemplate x:Key="CryptoTemplate">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="Crypto Vault" FontSize="24" FontWeight="Bold" Foreground="White" />
+                                <TextBlock Text="Спотовые и стейкинг активы с высоким APR и автозачислением." Foreground="#C5C7D3" TextWrapping="Wrap" />
+                                <Border Background="#1A1628" CornerRadius="12" Padding="16" BorderBrush="#2C2341" BorderThickness="1">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="BTC • 0.2813" Foreground="White" FontSize="18" FontWeight="SemiBold" />
+                                        <TextBlock Text="В стейкинге +6.2% APY" Foreground="#9BA0B5" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="#1A1628" CornerRadius="12" Padding="16" BorderBrush="#2C2341" BorderThickness="1">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="ETH • 1.87" Foreground="White" FontSize="18" FontWeight="SemiBold" />
+                                        <TextBlock Text="Layer2 мост активен" Foreground="#9BA0B5" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                            <Border Grid.Column="1" Background="#160F2A" CornerRadius="16" Padding="20" BorderBrush="#2C2341" BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Text="Рынок" Foreground="#C5C7D3" />
+                                    <TextBlock Text="BTC → 42 000 $" Foreground="White" FontSize="20" FontWeight="Bold" />
+                                    <TextBlock Text="ETH → 2 180 $" Foreground="White" FontSize="20" FontWeight="Bold" Margin="0,6,0,0" />
+                                    <TextBlock Text="Последнее обновление через WebSocket" Foreground="#7C7FA3" Margin="0,12,0,0" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </Grid.Resources>
+
+                <ContentControl x:Name="TabContent"
+                                Content="{Binding}"
+                                Opacity="1"
+                                ContentTemplate="{StaticResource FiatTemplate}" />
+
+                <Grid x:Name="LoaderOverlay"
+                      Background="#C0000000"
+                      Visibility="Collapsed">
+                    <Grid.Effect>
+                        <BlurEffect Radius="10" />
+                    </Grid.Effect>
+                    <Grid.Resources>
+                        <Storyboard x:Key="PulseStoryboard" RepeatBehavior="Forever">
+                            <DoubleAnimation Storyboard.TargetName="Hexagon"
+                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                             From="0.9" To="1.1" Duration="0:0:0.7" AutoReverse="True" />
+                            <DoubleAnimation Storyboard.TargetName="Hexagon"
+                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                             From="0.9" To="1.1" Duration="0:0:0.7" AutoReverse="True" />
+                            <DoubleAnimation Storyboard.TargetName="Hexagon"
+                                             Storyboard.TargetProperty="Opacity"
+                                             From="0.7" To="1" Duration="0:0:0.8" AutoReverse="True" />
+                        </Storyboard>
+                        <Storyboard x:Key="GlitchStoryboard" RepeatBehavior="Forever">
+                            <DoubleAnimation Storyboard.TargetName="GlitchLine1"
+                                             Storyboard.TargetProperty="Opacity"
+                                             From="0" To="0.4" Duration="0:0:0.12" AutoReverse="True" BeginTime="0:0:0.08" />
+                            <DoubleAnimation Storyboard.TargetName="GlitchLine1"
+                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                             From="-8" To="8" Duration="0:0:0.1" AutoReverse="True" />
+                            <DoubleAnimation Storyboard.TargetName="GlitchLine2"
+                                             Storyboard.TargetProperty="Opacity"
+                                             From="0" To="0.5" Duration="0:0:0.1" AutoReverse="True" BeginTime="0:0:0.2" />
+                            <DoubleAnimation Storyboard.TargetName="GlitchLine2"
+                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                             From="6" To="-10" Duration="0:0:0.09" AutoReverse="True" />
+                        </Storyboard>
+                    </Grid.Resources>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Ellipse Grid.RowSpan="3" Grid.ColumnSpan="2" Opacity="0.28" Fill="#6A1B9A" Width="380" Height="380" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <Polygon x:Name="Hexagon"
+                                 Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                 Points="60,0 120,35 120,105 60,140 0,105 0,35"
+                                 Stroke="#B026FF"
+                                 Fill="#2B1B41"
+                                 StrokeThickness="4"
+                                 RenderTransformOrigin="0.5,0.5">
+                            <Polygon.RenderTransform>
+                                <ScaleTransform ScaleX="1" ScaleY="1" />
+                            </Polygon.RenderTransform>
+                            <Polygon.Effect>
+                                <DropShadowEffect BlurRadius="25" Color="#B026FF" ShadowDepth="0" Opacity="0.8" />
+                            </Polygon.Effect>
+                        </Polygon>
+                        <Ellipse Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                 Width="80" Height="80" Stroke="#B026FF" StrokeThickness="2" Opacity="0.45">
+                            <Ellipse.RenderTransform>
+                                <RotateTransform Angle="0" />
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+                        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="LOADING"
+                                       Foreground="#FFFFFF"
+                                       FontSize="18"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding CurrentModeLabel, StringFormat=Switching to {0}}"
+                                       Foreground="#C3A6F7"
+                                       FontSize="12"
+                                       HorizontalAlignment="Center" />
+                        </StackPanel>
+                        <Rectangle x:Name="GlitchLine1"
+                                   Grid.Row="0"
+                                   Grid.ColumnSpan="2"
+                                   Height="6"
+                                   Margin="80,50"
+                                   Fill="#B026FF"
+                                   Opacity="0"
+                                   RenderTransformOrigin="0.5,0.5">
+                            <Rectangle.RenderTransform>
+                                <TranslateTransform />
+                            </Rectangle.RenderTransform>
+                        </Rectangle>
+                        <Rectangle x:Name="GlitchLine2"
+                                   Grid.Row="2"
+                                   Grid.ColumnSpan="2"
+                                   Height="4"
+                                   Margin="120,40"
+                                   Fill="#8B54FF"
+                                   Opacity="0"
+                                   RenderTransformOrigin="0.5,0.5">
+                            <Rectangle.RenderTransform>
+                                <TranslateTransform />
+                            </Rectangle.RenderTransform>
+                        </Rectangle>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
 </Window>
